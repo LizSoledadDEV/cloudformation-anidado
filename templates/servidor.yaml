@@ -32,7 +32,7 @@ Resources:
         - !Ref SecurityGroupId
       Tags:
         - Key: Name
-          Value: !Sub '${EnvironmentName}-servidor-demo'
+          Value: !Sub '${EnvironmentName}-servidor-demoliz'
 
 Outputs:
   InstanceId:
