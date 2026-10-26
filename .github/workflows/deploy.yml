@@ -1,0 +1,78 @@
+name: CloudFormation
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  STACK_NAME: asistencia
+  AWS_REGION: us-east-1
+
+# Evita que dos integrantes desplieguen al mismo tiempo
+concurrency:
+  group: cloudformation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar cfn-lint
+        run: pip install cfn-lint
+
+      - name: Validar plantillas
+        run: cfn-lint
+
+  desplegar:
+    needs: validar
+    # Solo se despliega lo que llega a main (push directo o merge de un PR)
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Crear bucket de plantillas si no existe
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          BUCKET="cfn-anidado-${ACCOUNT_ID}-${AWS_REGION}"
+          echo "BUCKET=${BUCKET}" >> "$GITHUB_ENV"
+          aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null || aws s3 mb "s3://${BUCKET}"
+
+      - name: Subir plantillas anidadas a S3
+        run: |
+          aws cloudformation package \
+            --template-file main.yaml \
+            --s3-bucket "$BUCKET" \
+            --s3-prefix templates \
+            --output-template-file packaged.yaml
+
+      - name: Desplegar stack
+        run: |
+          aws cloudformation deploy \
+            --template-file packaged.yaml \
+            --stack-name "$STACK_NAME" \
+            --no-fail-on-empty-changeset
+
+      - name: Mostrar salidas del stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query 'Stacks[0].Outputs' \
+            --output table

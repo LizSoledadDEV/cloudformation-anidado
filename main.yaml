@@ -12,14 +12,14 @@ Resources:
   NetworkStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://REEMPLAZAR-CON-URL-S3/red.yaml
+      TemplateURL: templates/red.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
 
   SecurityStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://REEMPLAZAR-CON-URL-S3/seguridad.yaml
+      TemplateURL: templates/seguridad.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
         VpcId: !GetAtt NetworkStack.Outputs.VpcId
@@ -27,7 +27,7 @@ Resources:
   ServerStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://REEMPLAZAR-CON-URL-S3/servidor.yaml
+      TemplateURL: templates/servidor.yaml
       Parameters:
         EnvironmentName: !Ref EnvironmentName
         SubnetId: !GetAtt NetworkStack.Outputs.SubnetId

@@ -1,0 +1,6 @@
+templates:
+  - main.yaml
+  - templates/*.yaml
+ignore_checks:
+  # TemplateURL usa rutas locales que reemplaza "aws cloudformation package"
+  - W3002
