@@ -1,0 +1,40 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla secundaria para configurar un servidor EC2
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: asistencia
+    Description: Nombre del entorno
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: ID de la subred donde se ubicaria el servidor
+
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: ID del grupo de seguridad del servidor
+
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: AMI de Amazon Linux 2023
+
+Resources:
+  ServidorAsistencia:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t3.micro
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-servidor'
+
+Outputs:
+  InstanceId:
+    Description: ID del servidor
+    Value: !Ref ServidorAsistencia

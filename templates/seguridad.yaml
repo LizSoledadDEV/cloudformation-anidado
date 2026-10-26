@@ -1,0 +1,34 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla secundaria para los grupos de seguridad
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: asistencia
+    Description: Nombre del entorno
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: ID de la VPC donde se creara el grupo de seguridad
+
+Resources:
+  SecurityGroupAsistencia:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub 'Grupo de seguridad para ${EnvironmentName}'
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - Description: Acceso HTTP para la practica
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-sg'
+
+Outputs:
+  SecurityGroupId:
+    Description: ID del grupo de seguridad
+    Value: !Ref SecurityGroupAsistencia

@@ -16,11 +16,36 @@ Resources:
       Parameters:
         EnvironmentName: !Ref EnvironmentName
 
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://REEMPLAZAR-CON-URL-S3/seguridad.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        VpcId: !GetAtt NetworkStack.Outputs.VpcId
+
+  ServerStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://REEMPLAZAR-CON-URL-S3/servidor.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        SubnetId: !GetAtt NetworkStack.Outputs.SubnetId
+        SecurityGroupId: !GetAtt SecurityStack.Outputs.SecurityGroupId
+
 Outputs:
   VpcId:
-    Description: VPC creada por la plantilla secundaria
+    Description: ID de la VPC
     Value: !GetAtt NetworkStack.Outputs.VpcId
 
   SubnetId:
-    Description: Subred creada por la plantilla secundaria
+    Description: ID de la subred publica
     Value: !GetAtt NetworkStack.Outputs.SubnetId
+
+  SecurityGroupId:
+    Description: ID del grupo de seguridad
+    Value: !GetAtt SecurityStack.Outputs.SecurityGroupId
+
+  InstanceId:
+    Description: ID del servidor EC2
+    Value: !GetAtt ServerStack.Outputs.InstanceId
