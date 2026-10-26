@@ -1,6 +1,6 @@
 
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Plantilla secundaria para crear la red
+Description: Plantilla secundaria de red para asistencia
 
 Parameters:
   EnvironmentName:
@@ -31,6 +31,41 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${EnvironmentName}-subred-publica'
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-igw'
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCAsistencia
+      InternetGatewayId: !Ref InternetGateway
+
+  TablaRutasPublica:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCAsistencia
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-rutas-publicas'
+
+  RutaInternet:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref TablaRutasPublica
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  AsociacionRutaPublica:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubredPublica
+      RouteTableId: !Ref TablaRutasPublica
 
 Outputs:
   VpcId:
