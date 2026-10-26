@@ -1,0 +1,42 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla secundaria para crear la red
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: asistencia
+    Description: Nombre del entorno
+
+Resources:
+  VPCAsistencia:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-vpc'
+
+  SubredPublica:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCAsistencia
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-subred-publica'
+
+Outputs:
+  VpcId:
+    Description: ID de la VPC
+    Value: !Ref VPCAsistencia
+
+  SubnetId:
+    Description: ID de la subred publica
+    Value: !Ref SubredPublica

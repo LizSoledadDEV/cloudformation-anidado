@@ -1,0 +1,26 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Plantilla principal de la infraestructura de asistencia
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: asistencia
+    Description: Nombre del entorno
+
+Resources:
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://REEMPLAZAR-CON-URL-S3/red.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+
+Outputs:
+  VpcId:
+    Description: VPC creada por la plantilla secundaria
+    Value: !GetAtt NetworkStack.Outputs.VpcId
+
+  SubnetId:
+    Description: Subred creada por la plantilla secundaria
+    Value: !GetAtt NetworkStack.Outputs.SubnetId
