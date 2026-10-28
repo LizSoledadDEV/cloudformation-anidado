@@ -32,7 +32,7 @@ Resources:
         - !Ref SecurityGroupId
       Tags:
         - Key: Name
-          Value: !Sub '${EnvironmentName}-servidor-demo-Ruben'
+          Value: !Sub '${EnvironmentName}-servidor-demo-Liz'
 
 Outputs:
   InstanceId:
